@@ -47,14 +47,16 @@ BUILD_VERSION := `git rev-parse HEAD`
 BUILD_TIME :=`date "+%Y-%m-%d[%H:%M:%S]%Z"`
 
 $(jarfile): .libs/libjzmq.dylib $(JZMQ_CLASS_FILES)
-	rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
-	echo "Name: org/zeromq/" > $(TMP_MANIFEST_PARTIAL)
-	echo "Specification-Title: jZMQ" >> $(TMP_MANIFEST_PARTIAL)
-	echo "Specification-Version: $(SPEC_VERSION)" >> $(TMP_MANIFEST_PARTIAL)
-	echo "Implementation-Title: org/zeromq/" >> $(TMP_MANIFEST_PARTIAL)
-	echo "Implementation-Version: $(BUILD_VERSION) $(BUILD_TIME)" >> $(TMP_MANIFEST_PARTIAL)
-	echo "Main-Class: $(JZMQ_APP_CLASS)" >> $(TMP_MANIFEST_PARTIAL)
-	echo "" >> $(TMP_MANIFEST_PARTIAL)
+	@echo Adding Native Code Library
+	@rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
+	@echo "Name: org/zeromq/" > $(TMP_MANIFEST_PARTIAL)
+	@echo "Specification-Title: jZMQ" >> $(TMP_MANIFEST_PARTIAL)
+	@echo "Specification-Version: $(SPEC_VERSION)" >> $(TMP_MANIFEST_PARTIAL)
+	@echo "Implementation-Title: org/zeromq/" >> $(TMP_MANIFEST_PARTIAL)
+	@echo "Implementation-Version: $(BUILD_VERSION) $(BUILD_TIME)" >> $(TMP_MANIFEST_PARTIAL)
+	@echo "Main-Class: $(JZMQ_APP_CLASS)" >> $(TMP_MANIFEST_PARTIAL)
+	@echo "" >> $(TMP_MANIFEST_PARTIAL)
+	@echo Building JAR $@...
 	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(JZMQ_CLASS_FILES) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
 
 jar_DATA = $(jarfile)
@@ -84,7 +86,7 @@ $(JZMQ_H_FILES): org/zeromq/ZMQ.class
 	$(CLASSPATH_ENV) $(JAVAH) -force -jni -classpath . org.zeromq.ZMQ
 
 $(JZMQ_CLASS_FILES): $(JZMQ_JAVA_FILES)
-	$(JAVAC) $(JAVACFLAGS) $^
+	$(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $^
 
 $(srcdir)/ZMQ.cpp: \
 	$(JZMQ_H_FILES) \
