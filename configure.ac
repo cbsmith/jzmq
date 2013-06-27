@@ -55,6 +55,9 @@ AC_ARG_WITH([zeromq],
             ;;
     esac ]
 )
+AC_ARG_VAR([JAVA_TARGET_VERSION], [Compile byte codes for a specific JVM version.])
+AC_ARG_VAR([JAVAC_EXTRA_FLAGS], [Any other flags worth passing directly to the compiler.])
+
 if test "x$zeromq_prefix" = "xdetect"; then
     PKG_CHECK_MODULES(
         [ZeroMQ], [libzmq], [zeromq_prefix=pkgconfig], [zeromq_prefix=])
@@ -86,6 +89,13 @@ fi
 AC_PATH_PROG(JAVA, java, [no], [$PATH:$JAVA_HOME/bin])
 if test "x$JAVA" = "xno"; then
     AC_MSG_ERROR([cannot find java.]);
+fi
+if test "x$JAVA_TARGET_VERSION" != "x"; then
+    JAVAC_EXTRA_FLAGS="-source $JAVA_TARGET_VERSION -target $JAVA_TARGET_VERSION $JAVAC_EXTRA_FLAGS"
+    AC_MSG_NOTICE([Setting JAVAC_EXTRA_FLAGS to $JAVAC_EXTRA_FLAGS])
+    AC_SUBST(JAVAC_EXTRA_FLAGS)
+else
+    AC_MSG_NOTICE([Going with default bytecode version.])
 fi
 
 # Check for JNI headers
