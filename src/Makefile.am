@@ -2,6 +2,8 @@ jarfile = zmq.jar
 jardir = $(datadir)/java
 
 JZMQ_JAVA_FILES = \
+    org/zeromq/App.java \
+    org/zeromq/EmbeddedLibraryTools.java \
 	org/zeromq/ZMQ.java \
 	org/zeromq/ZMQException.java \
 	org/zeromq/ZMQQueue.java \
@@ -25,7 +27,11 @@ JZMQ_H_FILES = \
 JZMQ_HPP_FILES = \
 	util.hpp
 
+JZMQ_APP_CLASS = org.zeromq.App
+
 JZMQ_CLASS_FILES = \
+    org/zeromq/App.class \
+    org/zeromq/EmbeddedLibraryTools.class \
 	org/zeromq/ZMQ.class \
 	org/zeromq/ZMQ$$Context.class \
 	org/zeromq/ZMQ$$Socket.class \
@@ -36,8 +42,20 @@ JZMQ_CLASS_FILES = \
 	org/zeromq/ZMQForwarder.class \
 	org/zeromq/ZMQStreamer.class
 
-$(jarfile): $(dist_noinst_JAVA)
-	$(JAR) cf $(JARFLAGS) $@ org/zeromq/*.class
+TMP_MANIFEST_PARTIAL = .partial_manifest
+BUILD_VERSION := `git rev-parse HEAD`
+BUILD_TIME :=`date "+%Y-%m-%d[%H:%M:%S]%Z"`
+
+$(jarfile): .libs/libjzmq.dylib $(JZMQ_CLASS_FILES)
+	rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
+	echo "Name: org/zeromq/" > $(TMP_MANIFEST_PARTIAL)
+	echo "Specification-Title: jZMQ" >> $(TMP_MANIFEST_PARTIAL)
+	echo "Specification-Version: $(SPEC_VERSION)" >> $(TMP_MANIFEST_PARTIAL)
+	echo "Implementation-Title: org/zeromq/" >> $(TMP_MANIFEST_PARTIAL)
+	echo "Implementation-Version: $(BUILD_VERSION) $(BUILD_TIME)" >> $(TMP_MANIFEST_PARTIAL)
+	echo "Main-Class: $(JZMQ_APP_CLASS)" >> $(TMP_MANIFEST_PARTIAL)
+	echo "" >> $(TMP_MANIFEST_PARTIAL)
+	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(JZMQ_CLASS_FILES) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
 
 jar_DATA = $(jarfile)
 
@@ -63,9 +81,10 @@ CLEANFILES = \
 	$(jarfile)
 
 $(JZMQ_H_FILES): org/zeromq/ZMQ.class
-	$(CLASSPATH_ENV) $(JAVAH) -jni -classpath . org.zeromq.ZMQ
+	$(CLASSPATH_ENV) $(JAVAH) -force -jni -classpath . org.zeromq.ZMQ
 
-./org/zeromq/ZMQ.class: classdist_noinst.stamp
+$(JZMQ_CLASS_FILES): $(JZMQ_JAVA_FILES)
+	$(JAVAC) $(JAVACFLAGS) $^
 
 $(srcdir)/ZMQ.cpp: \
 	$(JZMQ_H_FILES) \
