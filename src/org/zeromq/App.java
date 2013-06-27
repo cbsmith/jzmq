@@ -40,11 +40,11 @@ public class App {
 		System.out.printf(fmt, appname, "build commit:", version[0]);
 
 		System.out.println();
-		System.out.println("JNI lib location:       " + (EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY ? "embedded" : "java.library.path"));
-		System.out.println("current platform:       " + EmbeddedLibraryTools.getCurrentPlatformIdentifier());
+		System.out.println("JNI lib location:\t" + (EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY ? "embedded" : "java.library.path"));
+		System.out.println("current platform:\t" + EmbeddedLibraryTools.getCurrentPlatformIdentifier());
 		final Collection<String> files = EmbeddedLibraryTools.getEmbeddedLibraryList();
 		for (final String file : files) {
-			System.out.println("embedded library:       " + file);
+			System.out.println("embedded library:\t" + file);
 		}
 		
 	}
