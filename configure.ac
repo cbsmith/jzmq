@@ -23,6 +23,8 @@ AM_INIT_AUTOMAKE(tar-ustar)
 # libjzmq -version-info
 JLTVER="0:0:0"
 AC_SUBST(JLTVER)
+SPEC_VERSION="0.0.0"
+AC_SUBST(SPEC_VERSION)
 
 # Checks for programs.
 AC_PROG_LIBTOOL
@@ -67,9 +69,8 @@ AC_CHECK_LIB([zmq], [zmq_init], [],
     [AC_MSG_ERROR([cannot link with -lzmq])])
 
 # Check for JDK
-if test "x$JAVA_HOME" = "x"; then
-    AC_MSG_ERROR([the JAVA_HOME environment variable must be set to your JDK location.]);
-fi
+AX_CHECK_JAVA_HOME
+
 AC_PATH_PROG(JAVAC, javac, [no], [$PATH:$JAVA_HOME/bin])
 if test "x$JAVAC" = "xno"; then
     AC_MSG_ERROR([cannot find javac.]);
@@ -82,15 +83,18 @@ AC_PATH_PROG(JAR, jar, [no], [$PATH:$JAVA_HOME/bin])
 if test "x$JAR" = "xno"; then
     AC_MSG_ERROR([cannot find jar.]);
 fi
+AC_PATH_PROG(JAVA, java, [no], [$PATH:$JAVA_HOME/bin])
+if test "x$JAVA" = "xno"; then
+    AC_MSG_ERROR([cannot find java.]);
+fi
 
 # Check for JNI headers
-AC_MSG_CHECKING([for jni.h in $JAVA_HOME/include])
-if test -f $JAVA_HOME/include/jni.h; then
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_ERROR([cannot find jni.h in $JAVA_HOME/include.]);
-fi
-CPPFLAGS="$CPPFLAGS -I${JAVA_HOME}/include"
+AX_JNI_INCLUDE_DIR
+
+for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+do
+        CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+done
 
 # Need host-specific path for jni_md.h on some systems, this is braindead
 AC_CANONICAL_HOST
