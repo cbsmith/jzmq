@@ -57,7 +57,7 @@ $(jarfile): .libs/libjzmq.dylib $(JZMQ_CLASS_FILES)
 	@echo "Main-Class: $(JZMQ_APP_CLASS)" >> $(TMP_MANIFEST_PARTIAL)
 	@echo "" >> $(TMP_MANIFEST_PARTIAL)
 	@echo Building JAR $@...
-	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(JZMQ_CLASS_FILES) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
+	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(subst $$,\$$,$(JZMQ_CLASS_FILES)) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
 
 jar_DATA = $(jarfile)
 
