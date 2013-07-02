@@ -153,6 +153,8 @@ public class EmbeddedLibraryTools {
 				// mission failed, do nothing
 			} catch (final RuntimeException r) {
 				// mission failed, do nothing
+			} catch (final UnsatisfiedLinkError l) {
+				// mission failed, do nothing
 			}
 
 		} // nativeLibraryUrl exists
