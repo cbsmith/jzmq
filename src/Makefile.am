@@ -43,19 +43,27 @@ JZMQ_CLASS_FILES = \
 	org/zeromq/ZMQStreamer.class
 
 TMP_MANIFEST_PARTIAL = .partial_manifest
-BUILD_VERSION := `git rev-parse HEAD`
-BUILD_TIME :=`date "+%Y-%m-%d[%H:%M:%S]%Z"`
 
-$(jarfile): .libs/libjzmq.dylib $(JZMQ_CLASS_FILES)
+NATIVE_LIB_FILE_PATH=libjzmq.$(LIB_EXTENSION)
+
+#Rather tedious process to get the right dlname across platforms.
+#We computed the what the name should be during autoconf, but this covers libtool variations
+$(NATIVE_LIB_FILE_PATH): libjzmq.la
+	ln -s .libs/`fgrep dlname libjzmq.la | cut -d = -f 2 | tr -d \'` $@
+
+$(TMP_MANIFEST_PARTIAL):
+	@echo "Building JAR manifest..."
+	@echo "Name: org/zeromq/" > $@
+	@echo "Specification-Title: jZMQ" >> $@
+	@echo "Specification-Version: $(SPEC_VERSION)" >> $@
+	@echo "Implementation-Title: org/zeromq/" >> $@
+	@echo "Implementation-Version: $(BUILD_VERSION) $(BUILD_TIME)" >> $@
+	@echo "Main-Class: $(JZMQ_APP_CLASS)" >> $@
+	@echo "" >> $@
+
+$(jarfile): $(NATIVE_LIB_FILE_PATH) $(JZMQ_CLASS_FILES) $(TMP_MANIFEST_PARTIAL)
 	@echo Adding Native Code Library
 	@rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
-	@echo "Name: org/zeromq/" > $(TMP_MANIFEST_PARTIAL)
-	@echo "Specification-Title: jZMQ" >> $(TMP_MANIFEST_PARTIAL)
-	@echo "Specification-Version: $(SPEC_VERSION)" >> $(TMP_MANIFEST_PARTIAL)
-	@echo "Implementation-Title: org/zeromq/" >> $(TMP_MANIFEST_PARTIAL)
-	@echo "Implementation-Version: $(BUILD_VERSION) $(BUILD_TIME)" >> $(TMP_MANIFEST_PARTIAL)
-	@echo "Main-Class: $(JZMQ_APP_CLASS)" >> $(TMP_MANIFEST_PARTIAL)
-	@echo "" >> $(TMP_MANIFEST_PARTIAL)
 	@echo Building JAR $@...
 	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(subst $$,\$$,$(JZMQ_CLASS_FILES)) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
 

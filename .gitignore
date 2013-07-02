@@ -33,6 +33,7 @@ stamp-*
 *~
 src/config.hpp*
 src/org_zeromq_*.h
+src/libjzmq.dylib
 lib/
 target/
 .classpath

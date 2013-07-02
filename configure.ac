@@ -27,6 +27,7 @@ SPEC_VERSION="0.0.0"
 AC_SUBST(SPEC_VERSION)
 
 # Checks for programs.
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 # AC_PROG_SED
 AC_PROG_AWK
@@ -126,8 +127,25 @@ case "${host_os}" in
     ;;
 esac
 
+case "${host_os}" in
+    *darwin*) AC_SUBST(LIB_EXTENSION,[dylib])
+    ;;
+    *mingw*) AC_SUBST(LIB_EXTENSION,[dll])
+    ;;
+    *cygwin*) AC_SUBST(LIB_EXTENSION,[dll])
+    ;;
+    *) AC_SUBST(LIB_EXTENSION,[so])
+    ;;
+esac
+
 JAVAROOT=.
 AC_SUBST(JAVAROOT)
+
+
+BUILD_VERSION=`git rev-parse HEAD`
+BUILD_TIME=`date "+%Y-%m-%d[%H:%M:%S]%Z"`
+AC_SUBST(BUILD_VERSION)
+AC_SUBST(BUILD_TIME)
 
 AC_OUTPUT(Makefile src/Makefile perf/Makefile)
 
@@ -140,4 +158,3 @@ case "${host_os}" in
         chmod 755 libtool
         ;;
 esac
-
