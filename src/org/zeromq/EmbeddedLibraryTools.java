@@ -151,7 +151,7 @@ public class EmbeddedLibraryTools {
 
 			} catch (final IOException x) {
 				// mission failed, do nothing
-			} catch (final SecurityException x) {
+			} catch (final RuntimeException r) {
 				// mission failed, do nothing
 			}
 
