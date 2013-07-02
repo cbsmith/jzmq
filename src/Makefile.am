@@ -51,7 +51,7 @@ NATIVE_LIB_FILE_PATH=libjzmq.$(LIB_EXTENSION)
 $(NATIVE_LIB_FILE_PATH): libjzmq.la
 	ln -sf .libs/`fgrep dlname libjzmq.la | cut -d = -f 2 | tr -d \'` $@
 
-$(TMP_MANIFEST_PARTIAL): Makefile.am
+$(TMP_MANIFEST_PARTIAL): Makefile
 	@echo "Building JAR manifest..."
 	@echo "Name: org/zeromq/" > $@
 	@echo "Specification-Title: jZMQ" >> $@
