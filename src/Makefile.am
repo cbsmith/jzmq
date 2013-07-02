@@ -88,7 +88,9 @@ BUILT_SOURCES = \
 CLEANFILES = \
 	$(JZMQ_H_FILES) \
 	$(JZMQ_CLASS_FILES) \
-	$(jarfile)
+	$(jarfile) \
+	$(NATIVE_LIB_FILE_PATH) \
+	$(TMP_MANIFEST_PARTIAL)
 
 $(JZMQ_H_FILES): org/zeromq/ZMQ.class
 	$(CLASSPATH_ENV) $(JAVAH) -force -jni -classpath . org.zeromq.ZMQ
