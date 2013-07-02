@@ -96,8 +96,8 @@ public class EmbeddedLibraryTools {
 
 		// attempt to locate embedded native library within JAR at following location:
 		// /NATIVE/${os.arch}/${os.name}/libjzmq.[so|dylib|dll]
-		String[] allowedExtensions = new String[] {"so", "dylib", "dll"};
-		StringBuilder url = new StringBuilder();
+		final String[] allowedExtensions = new String[] {"so", "dylib", "dll"};
+		final StringBuilder url = new StringBuilder();
 		url.append("/NATIVE/");
 		url.append(getCurrentPlatformIdentifier());
 		url.append("/libjzmq.");    	
@@ -137,7 +137,7 @@ public class EmbeddedLibraryTools {
 				final OutputStream out = new BufferedOutputStream(new FileOutputStream(libfile));
 
 				int len = 0;
-				byte[] buffer = new byte[8192];
+				final byte[] buffer = new byte[8192];
 				while ((len = in.read(buffer)) > -1)
 					out.write(buffer, 0, len);
 				out.close();
@@ -149,7 +149,7 @@ public class EmbeddedLibraryTools {
 
 				usingEmbedded = true;
 
-			} catch (IOException x) {
+			} catch (final IOException x) {
 				// mission failed, do nothing
 			}
 
