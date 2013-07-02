@@ -112,10 +112,25 @@ public class EmbeddedLibraryTools {
 		if (nativeLibraryUrl != null) {
 
 			// native library found within JAR, extract and load
+			String tmpDirPath = null;
+			try {
+				tmpDirPath = System.getenv("TMP");
+				if (tmpDirPath == null) {
+					tmpDirPath = System.getenv("TEMP");
+				}
+				if (tmpDirPath == null) {
+					tmpDirPath = System.getenv("TMP_DIR");
+				}
+				if (tmpDirPath == null) {
+					tmpDirPath = System.getenv("TEMP_DIR");
+				}
+			} catch (final SecurityException e) {
+				System.err.println("Encountered security restriction while looking for temporary directory" + e);
+			}
 
 			try {
-
-				final File libfile = File.createTempFile("libjzmq-", ".lib");
+				final File tmpDir = (tmpDirPath == null) ? null : new File(tmpDirPath);
+				final File libfile = File.createTempFile("libjzmq-", ".lib", tmpDir);
 				libfile.deleteOnExit(); // just in case
 
 				final InputStream in = nativeLibraryUrl.openStream();
