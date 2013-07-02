@@ -49,9 +49,9 @@ NATIVE_LIB_FILE_PATH=libjzmq.$(LIB_EXTENSION)
 #Rather tedious process to get the right dlname across platforms.
 #We computed the what the name should be during autoconf, but this covers libtool variations
 $(NATIVE_LIB_FILE_PATH): libjzmq.la
-	ln -s .libs/`fgrep dlname libjzmq.la | cut -d = -f 2 | tr -d \'` $@
+	ln -sf .libs/`fgrep dlname libjzmq.la | cut -d = -f 2 | tr -d \'` $@
 
-$(TMP_MANIFEST_PARTIAL):
+$(TMP_MANIFEST_PARTIAL): Makefile.am
 	@echo "Building JAR manifest..."
 	@echo "Name: org/zeromq/" > $@
 	@echo "Specification-Title: jZMQ" >> $@
@@ -65,7 +65,7 @@ $(jarfile): $(NATIVE_LIB_FILE_PATH) $(JZMQ_CLASS_FILES) $(TMP_MANIFEST_PARTIAL)
 	@echo Adding Native Code Library
 	@rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
 	@echo Building JAR $@...
-	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(subst $$,\$$,$(JZMQ_CLASS_FILES)) NATIVE && rm -rf NATIVE $(TMP_MANIFEST_PARTIAL)
+	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(subst $$,\$$,$(JZMQ_CLASS_FILES)) NATIVE && rm -rf NATIVE
 
 jar_DATA = $(jarfile)
 

@@ -34,6 +34,7 @@ stamp-*
 src/config.hpp*
 src/org_zeromq_*.h
 src/libjzmq.dylib
+src/.partial_manifest
 lib/
 target/
 .classpath
