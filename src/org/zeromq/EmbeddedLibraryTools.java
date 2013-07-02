@@ -151,8 +151,9 @@ public class EmbeddedLibraryTools {
 
 			} catch (final IOException x) {
 				// mission failed, do nothing
+			} catch (final SecurityException x) {
+				// mission failed, do nothing
 			}
-
 
 		} // nativeLibraryUrl exists
 		
