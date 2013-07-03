@@ -17,10 +17,7 @@ import java.util.jar.JarFile;
 public class EmbeddedLibraryTools {
 	
 	public static final boolean LOADED_EMBEDDED_LIBRARY;
-	
-	static {
-		LOADED_EMBEDDED_LIBRARY = loadEmbeddedLibrary();
-	}
+	private static final String[] CANDIDATE_TEMP_ENV_VARS = { "TMP", "TEMP", "TMPDIR", "TEMPDIR", "TMP_DIR", "TEMP_DIR" };
 	
 	public static String getCurrentPlatformIdentifier() {
 		return System.getProperty("os.arch") + "/" + System.getProperty("os.name");
@@ -102,35 +99,22 @@ public class EmbeddedLibraryTools {
 		url.append(getCurrentPlatformIdentifier());
 		url.append("/libjzmq.");    	
 		URL nativeLibraryUrl = null;
+		String ext = null;
 		// loop through extensions, stopping after finding first one
-		for (String ext : allowedExtensions) {
+		for (String attempt : allowedExtensions) {
+			ext = attempt;
 			nativeLibraryUrl = ZMQ.class.getResource(url.toString() + ext);
-			if (nativeLibraryUrl != null)
+			if (nativeLibraryUrl != null) {
 				break;
+			}
 		}
 
 		if (nativeLibraryUrl != null) {
 
 			// native library found within JAR, extract and load
-			String tmpDirPath = null;
 			try {
-				tmpDirPath = System.getenv("TMP");
-				if (tmpDirPath == null) {
-					tmpDirPath = System.getenv("TEMP");
-				}
-				if (tmpDirPath == null) {
-					tmpDirPath = System.getenv("TMP_DIR");
-				}
-				if (tmpDirPath == null) {
-					tmpDirPath = System.getenv("TEMP_DIR");
-				}
-			} catch (final SecurityException e) {
-				System.err.println("Encountered security restriction while looking for temporary directory" + e);
-			}
-
-			try {
-				final File tmpDir = (tmpDirPath == null) ? null : new File(tmpDirPath);
-				final File libfile = File.createTempFile("libjzmq-", ".lib", tmpDir);
+				final File tmpDir = getTempDirectory();
+				final File libfile = File.createTempFile("libjzmq-", "." + ext, tmpDir);
 				libfile.deleteOnExit(); // just in case
 
 				final InputStream in = nativeLibraryUrl.openStream();
@@ -162,7 +146,25 @@ public class EmbeddedLibraryTools {
 		return usingEmbedded;
 
 	}
+
+	private static File getTempDirectory() {
+		for (String candidate: CANDIDATE_TEMP_ENV_VARS) {
+			try {
+				final String path = System.getenv(candidate);
+				if (path != null) {
+					return new File(path);
+				}
+			} catch (final SecurityException e) {
+				System.err.println("Encountered security restriction while trying to get environment variable " + candidate);
+			}
+		}
+
+		return null;
+	}
 	
 	private EmbeddedLibraryTools() {};
 
+	static {
+		LOADED_EMBEDDED_LIBRARY = loadEmbeddedLibrary();
+	}
 }
