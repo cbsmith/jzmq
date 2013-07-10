@@ -1,4 +1,4 @@
-AM_JAVACFLAGS=-classpath $(top_builddir)/src
+JAVACFLAGS=-classpath $(top_builddir)/src
 
 jarfile = zmq-perf.jar
 
@@ -14,8 +14,12 @@ JZMQ_PERF_CLASS_FILES = \
 	remote_lat.class \
 	remote_thr.class
 
-$(jarfile): $(dist_noinst_JAVA) classnoinst.stamp
-	$(JAR) cf $(JARFLAGS) $@ $(JZMQ_PERF_CLASS_FILES)
+%.class: %.java
+	$(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $^
+
+
+$(jarfile): $(JZMQ_PERF_CLASS_FILES)
+	$(JAR) cf $(JARFLAGS) $@ $^
 
 dist_noinst_DATA = $(jarfile)
 
