@@ -44,14 +44,11 @@ JNIEXPORT jlong JNICALL Java_org_zeromq_ZMQ_00024Poller_run_1poll (JNIEnv *env,
     
     int ls_0mq = 0;
     int le_0mq = 0;
-    int lr_0mq = 0;
 
     if (socket_0mq)
         ls_0mq = env->GetArrayLength (socket_0mq);
     if (event_0mq)
         le_0mq = env->GetArrayLength (event_0mq);
-    if (revent_0mq)
-        lr_0mq = env->GetArrayLength (revent_0mq);
 
     if (ls > ls_0mq || ls > le_0mq || ls > ls_0mq)
         return 0;
