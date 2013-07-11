@@ -141,6 +141,10 @@ esac
 JAVAROOT=.
 AC_SUBST(JAVAROOT)
 
+dnl Want to use this to generate the Manifest from M4
+JZMQ_APP_CLASS=org.zeromq.App
+AC_SUBST(JZMQ_APP_CLASS)
+
 dnl This is a horrid hack so that automake doesn't complain about $(subst $$,\$$,$(JZMQ_CLASS_FILES))
 dnl Credit where credit is due: http://stackoverflow.com/questions/7437116/is-there-a-way-to-tell-automake-not-to-interpret-part-of-the-automakefile
 ESCAPED_JZMQ_CLASS_FILES='$(JZMQ_CLASS_FILES)'

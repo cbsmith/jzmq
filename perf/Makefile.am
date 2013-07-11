@@ -14,12 +14,14 @@ JZMQ_PERF_CLASS_FILES = \
 	remote_lat.class \
 	remote_thr.class
 
-%.class: %.java
-	$(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $^
+$(JZMQ_PERF_CLASS_FILES): dist_noinst_classes.stamp
 
+dist_noinst_classes.stamp: $(JZMQ_PERF_JAVA_FILES)
+	@echo $(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $(JZMQ_PERF_JAVA_FILES)
+	@NEWEST=`ls -t $? | head -1`; $(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $? && touch -r $$NEWEST $@ && echo "  Touched $@ to match timestamp of $$NEWEST"
 
-$(jarfile): $(JZMQ_PERF_CLASS_FILES)
-	$(JAR) cf $(JARFLAGS) $@ $^
+$(jarfile): dist_noinst_classes.stamp
+	$(JAR) cf $(JARFLAGS) $@ $(JZMQ_PERF_CLASS_FILES)
 
 dist_noinst_DATA = $(jarfile)
 
@@ -30,4 +32,5 @@ BUILT_SOURCES = \
 
 CLEANFILES = \
 	$(JZMQ_PERF_CLASS_FILES) \
+	dist_noinst_classes.stamp \
 	$(jarfile)

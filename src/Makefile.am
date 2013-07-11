@@ -27,8 +27,6 @@ JZMQ_H_FILES = \
 JZMQ_HPP_FILES = \
 	util.hpp
 
-JZMQ_APP_CLASS = org.zeromq.App
-
 JZMQ_CLASS_FILES = \
     org/zeromq/App.class \
     org/zeromq/EmbeddedLibraryTools.class \
@@ -65,11 +63,9 @@ $(jarfile): $(NATIVE_LIB_FILE_PATH) $(JZMQ_CLASS_FILES) $(TMP_MANIFEST_PARTIAL)
 	@echo Adding Native Code Library
 	@rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
 	@echo Building JAR $@...
-	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(subst $$,\$$,$(JZMQ_CLASS_FILES)) NATIVE && rm -rf NATIVE
+	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) @ESCAPED_JZMQ_CLASS_FILES@ NATIVE && rm -rf NATIVE
 
 jar_DATA = $(jarfile)
-
-dist_noinst_JAVA = $(JZMQ_JAVA_FILES)
 
 lib_LTLIBRARIES = libjzmq.la
 libjzmq_la_SOURCES = $(JZMQ_CPP_FILES)
@@ -85,22 +81,35 @@ BUILT_SOURCES = \
 	$(JZMQ_H_FILES) \
 	$(JZMQ_CLASS_FILES)
 
+#Horrible hack to get around automake not liking when we escape $ using $(subst $$,\$$,foo)
+clean-local:
+	@echo rm -f @ESCAPED_JZMQ_CLASS_FILES@
+	@-echo '@ESCAPED_JZMQ_CLASS_FILES@' | xargs rm -f
+
 CLEANFILES = \
 	$(JZMQ_H_FILES) \
 	$(JZMQ_CLASS_FILES) \
 	$(jarfile) \
 	$(NATIVE_LIB_FILE_PATH) \
-	$(TMP_MANIFEST_PARTIAL)
+	$(TMP_MANIFEST_PARTIAL) \
+	jni_stubs_noinst.stamp \
+	noinst_class_files.stamp \
+	classnoinst.stamp \
+	NATIVE
 
-$(JZMQ_H_FILES): org/zeromq/ZMQ.class
-	$(CLASSPATH_ENV) $(JAVAH) -force -jni -classpath . org.zeromq.ZMQ
+#These .stamp files are used to ensure that even in parallel mode with multiple targets needing a rebuild, the command runs but once
+jni_stubs_noinst.stamp: org/zeromq/ZMQ.class
+	$(CLASSPATH_ENV) $(JAVAH) -force -jni -classpath . org.zeromq.ZMQ && touch -r $< $@
 
-$(JZMQ_CLASS_FILES): $(JZMQ_JAVA_FILES)
-	$(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $^
+noinst_class_files.stamp: $(JZMQ_JAVA_FILES)
+	@echo $(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $?
+	@NEWEST=`ls -t $? | head -1`; $(JAVAC) $(JAVACFLAGS) $(JAVAC_EXTRA_FLAGS) $? && touch -r $$NEWEST $@ && echo "  Touched $@ to match timestamp of $$NEWEST"
 
-$(srcdir)/ZMQ.cpp: \
-	$(JZMQ_H_FILES) \
-	$(JZMQ_HPP_FILES)
+$(JZMQ_H_FILES): jni_stubs_noinst.stamp
+
+$(JZMQ_CLASS_FILES): noinst_class_files.stamp
+
+$(srcdir)/ZMQ.cpp: $(JZMQ_H_FILES) $(JZMQ_HPP_FILES)
 
 $(srcdir)/Context.cpp: \
 	org_zeromq_ZMQ_Context.h \
