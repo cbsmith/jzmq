@@ -141,6 +141,12 @@ esac
 JAVAROOT=.
 AC_SUBST(JAVAROOT)
 
+dnl This is a horrid hack so that automake doesn't complain about $(subst $$,\$$,$(JZMQ_CLASS_FILES))
+dnl Credit where credit is due: http://stackoverflow.com/questions/7437116/is-there-a-way-to-tell-automake-not-to-interpret-part-of-the-automakefile
+ESCAPED_JZMQ_CLASS_FILES='$(JZMQ_CLASS_FILES)'
+AC_SUBST([ESCAPED_JZMQ_CLASS_FILES])
+AM_SUBST_NOTMAKE([ESCAPED_JZMQ_CLASS_FILES])
+
 
 BUILD_VERSION=`git rev-parse HEAD`
 BUILD_TIME=`date "+%Y-%m-%d[%H:%M:%S]%Z"`
