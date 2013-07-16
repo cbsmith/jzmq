@@ -40,6 +40,19 @@ JZMQ_CLASS_FILES = \
 	org/zeromq/ZMQForwarder.class \
 	org/zeromq/ZMQStreamer.class
 
+ESCAPED_JZMQ_CLASS_FILES = \
+    org/zeromq/App.class \
+    org/zeromq/EmbeddedLibraryTools.class \
+	org/zeromq/ZMQ.class \
+	org/zeromq/ZMQ\$$Context.class \
+	org/zeromq/ZMQ\$$Socket.class \
+	org/zeromq/ZMQ\$$Poller.class \
+	org/zeromq/ZMQ\$$Error.class \
+	org/zeromq/ZMQException.class \
+	org/zeromq/ZMQQueue.class \
+	org/zeromq/ZMQForwarder.class \
+	org/zeromq/ZMQStreamer.class
+
 TMP_MANIFEST_PARTIAL = .partial_manifest
 
 NATIVE_LIB_FILE_PATH=libjzmq.$(LIB_EXTENSION)
@@ -63,7 +76,7 @@ $(jarfile): $(NATIVE_LIB_FILE_PATH) $(JZMQ_CLASS_FILES) $(TMP_MANIFEST_PARTIAL)
 	@echo Adding Native Code Library
 	@rm -rf NATIVE && mkdir -v -p "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`" && cp $< "NATIVE/`$(JAVA) org.zeromq.App | grep '^current platform:' | cut -f 2`"
 	@echo Building JAR $@...
-	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) @ESCAPED_JZMQ_CLASS_FILES@ NATIVE && rm -rf NATIVE
+	$(JAR) cfm $(JARFLAGS) $@ $(TMP_MANIFEST_PARTIAL) $(ESCAPED_JZMQ_CLASS_FILES) NATIVE && rm -rf NATIVE
 
 jar_DATA = $(jarfile)
 
@@ -83,8 +96,8 @@ BUILT_SOURCES = \
 
 #Horrible hack to get around automake not liking when we escape $ using $(subst $$,\$$,foo)
 clean-local:
-	@echo rm -f @ESCAPED_JZMQ_CLASS_FILES@
-	@-echo '@ESCAPED_JZMQ_CLASS_FILES@' | xargs rm -f
+	@echo rm -f $(ESCAPED_JZMQ_CLASS_FILES)
+	@-echo '$(ESCAPED_JZMQ_CLASS_FILES)' | xargs rm -f
 
 CLEANFILES = \
 	$(JZMQ_H_FILES) \
