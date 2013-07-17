@@ -108,6 +108,7 @@ CLEANFILES = \
 	jni_stubs_noinst.stamp \
 	noinst_class_files.stamp \
 	classnoinst.stamp \
+	$(TMP_MANIFEST_PARTIAL) \
 	NATIVE
 
 #These .stamp files are used to ensure that even in parallel mode with multiple targets needing a rebuild, the command runs but once
